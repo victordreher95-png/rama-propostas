@@ -344,24 +344,9 @@ header span{font-size:12px;font-weight:600;color:var(--text-muted)}
     <div class="card-header teal">Proposta Rama</div>
     <div class="card-body" id="cotas-proposta"></div>
     <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:8px">
-      <div class="filtro-row" id="filtro-row" style="display:none;opacity:0;transition:opacity .2s">
-        <div class="filtro-field">
-          <label>Tipo</label>
-          <select class="filtro-select" id="filtro-tipo" onchange="atualizarFiltro()">
-            <option value="veiculo">🚗 Veículo</option>
-            <option value="imovel">🏠 Imóvel</option>
-          </select>
-        </div>
-        <div class="filtro-field">
-          <label>Base</label>
-          <select class="filtro-select" id="filtro-base" onchange="atualizarFiltro()">
-            <option value="todos">Geral</option>
-            <option value="rama">Somente Rama</option>
-          </select>
-        </div>
-      </div>
+
       <button class="add-btn" onclick="addCota('proposta')">+ Adicionar cota</button>
-      <button class="add-btn" type="button" style="border-color:var(--rama);color:var(--rama)" onclick="abrirCombinador()">🎯 Combinador de valor pago</button>
+      <button class="add-btn" type="button" style="border-color:var(--rama);color:var(--rama)" onclick="abrirCombinador()">🔍 Buscar por valor pago</button>
       <span id="db-status-veiculo" style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center"></span>
       <span id="db-status-imovel" style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center"></span>
     </div>
@@ -383,7 +368,7 @@ header span{font-size:12px;font-weight:600;color:var(--text-muted)}
 <div id="comb-overlay" onclick="if(event.target===this)fecharCombinador()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:16px">
   <div style="width:100%;max-width:440px;max-height:85vh;background:rgba(10,20,40,0.95);backdrop-filter:blur(24px);border:1px solid rgba(0,157,165,0.2);border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.6);display:flex;flex-direction:column">
     <div style="background:linear-gradient(90deg,rgba(0,157,165,0.4),rgba(0,157,165,0.15));border-bottom:1px solid rgba(0,157,165,0.25);color:rgba(255,255,255,0.9);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-      <span style="font-size:14px;font-weight:700">🎯 Combinador de valor pago</span>
+      <span style="font-size:14px;font-weight:700">🔍 Buscar por valor pago</span>
       <button type="button" onclick="fecharCombinador()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0">✕</button>
     </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto">
@@ -405,7 +390,24 @@ header span{font-size:12px;font-weight:600;color:var(--text-muted)}
           <button type="button" class="comb-margem-btn" onclick="setMargem(20,this)">20%</button>
         </div>
       </div>
-      <button type="button" onclick="combinar()" style="background:linear-gradient(90deg,#009DA5,#007A80);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 4px 16px rgba(0,157,165,0.3)">Buscar combinações</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">Tipo</div>
+          <select class="filtro-select" id="filtro-tipo" onchange="atualizarFiltro()" style="width:100%">
+            <option value="veiculo">🚗 Veículo</option>
+            <option value="imovel">🏠 Imóvel</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px">Base</div>
+          <select class="filtro-select" id="filtro-base" onchange="atualizarFiltro()" style="width:100%">
+            <option value="todos">Geral</option>
+            <option value="rama">Somente Rama</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" onclick="combinar()" style="background:linear-gradient(90deg,#009DA5,#007A80);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 4px 16px rgba(0,157,165,0.3)">Buscar</button>
       <div id="comb-info" style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center"></div>
       <div id="comb-resultado" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -414,49 +416,12 @@ header span{font-size:12px;font-weight:600;color:var(--text-muted)}
 
 <div class="side-panel" id="side-panel">
   <div class="side-panel-header">
-    🧮 Calculadora · 📝 Anotações
+    📝 Anotações
     <button class="side-panel-close" onclick="fecharPainel()">✕</button>
   </div>
   <div class="side-panel-body">
 
     <!-- CALCULADORA -->
-    <span class="panel-section-title">🧮 Calculadora interna</span>
-    <div class="calc-section">
-      <div class="calc-section-title">Cota do cliente</div>
-      <div class="calc-row three">
-        <div class="calc-field"><label>Parcela</label><input id="c-parcela" class="auto" readonly></div>
-        <div class="calc-field"><label>Crédito</label><input id="c-credito" class="auto" readonly></div>
-        <div class="calc-field"><label>Pago</label><input id="c-pago" class="auto" readonly></div>
-      </div>
-      <div class="calc-row">
-        <div class="calc-field"><label>Proposta ✏️</label><input id="c-proposta" class="manual" type="tel" placeholder="0,00" oninput="maskMoney(this);calcular()"></div>
-        <div class="calc-field"><label>Ajuste ✏️</label><input id="c-ajuste" class="manual" type="tel" placeholder="0,00" oninput="maskMoney(this);calcular()"></div>
-      </div>
-      <div class="calc-row">
-        <div class="calc-field"><label>Valor Cartas</label><input id="c-cartas" class="auto" readonly></div>
-        <div class="calc-field"><label>Sobra</label><input id="c-sobra" class="auto" readonly></div>
-      </div>
-    </div>
-    <div class="calc-section">
-      <div class="calc-section-title">Proposta Rama</div>
-      <div class="calc-row three">
-        <div class="calc-field"><label>Parcela</label><input id="p-parcela" class="auto" readonly></div>
-        <div class="calc-field"><label>Crédito</label><input id="p-credito" class="auto" readonly></div>
-        <div class="calc-field"><label>Pago</label><input id="p-pago" class="auto" readonly></div>
-      </div>
-      <div class="calc-row three">
-        <div class="calc-field"><label>Imóvel 36%</label><input id="p-imovel" class="auto" readonly></div>
-        <div class="calc-field"><label>Veículo 39%</label><input id="p-veiculo" class="auto" readonly></div>
-        <div class="calc-field"><label>Créd. 30%</label><input id="p-cred30" class="auto" readonly></div>
-      </div>
-    </div>
-    <div class="calc-field">
-      <label>PIX sugerido</label>
-      <input id="calc-pix" class="destaque" readonly>
-    </div>
-
-    <hr class="divider">
-
     <!-- ANOTAÇÕES -->
     <span class="panel-section-title">📝 Anotações</span>
     <textarea class="nota-textarea" id="nota-texto" placeholder="Maior crédito, redução, etc..." oninput="salvarNota()"></textarea>
@@ -492,12 +457,7 @@ header span{font-size:12px;font-weight:600;color:var(--text-muted)}
   </div>
 </div>
 
-<div class="fab-group">
-  <div class="fab-pill" onclick="abrirCalc()">
-    <span class="fab-pill-text">Calcular</span>
-    <span class="fab-pill-dot apagado" id="fab-dot"></span>
-  </div>
-</div>
+
 
 <div class="hist-overlay" id="hist-overlay" onclick="fecharHistorico()"></div>
 <div class="hist-panel" id="hist-panel">
@@ -697,16 +657,9 @@ async function fetchBases() {
     gcInput.addEventListener('input', () => buscarCota(gcInput, sugg));
     gcInput.addEventListener('focus', () => {
       if (gcInput.value) buscarCota(gcInput, sugg);
-      const fr = document.getElementById('filtro-row');
-      if (fr) { fr.style.display='grid'; setTimeout(()=>fr.style.opacity='1',10); }
+
     });
-    gcInput.addEventListener('blur', () => {
-      setTimeout(() => {
-        if (document.activeElement?.closest('#filtro-row')) return;
-        const fr = document.getElementById('filtro-row');
-        if (fr) { fr.style.opacity='0'; setTimeout(()=>{ if(fr.style.opacity==='0') fr.style.display='none'; },200); }
-      }, 200);
-    });
+
   }
 
   if (saved) {
@@ -727,7 +680,7 @@ function coletarCotas(secao) {
     parcela: parseMoney(row.querySelector('.parcela').value),
     credito: parseMoney(row.querySelector('.credito').value),
     pago: parseMoney(row.querySelector('.pago').value),
-  }));
+  })).filter(c => c.grupocota !== '—' || c.pago > 0 || c.credito > 0);
 }
 function totalCotas(c) { return c.reduce((a,r) => ({parcela:a.parcela+r.parcela, credito:a.credito+r.credito, pago:a.pago+r.pago}), {parcela:0,credito:0,pago:0}); }
 
@@ -804,7 +757,8 @@ async function fetchBases() {
 // Autocomplete
 function buscarCota(input, sugg) {
   const q = input.value.trim().toLowerCase();
-  const base = getBase();
+  // Autocomplete busca em todas as bases
+  const base = [...baseVeiculoGeral, ...baseVeiculoRama, ...baseImovelGeral, ...baseImovelRama];
   if (!q || !base.length) { sugg.style.display = 'none'; return; }
   const matches = base.filter(c => c.grupocota.toLowerCase().includes(q)).slice(0, 8);
   if (!matches.length) { sugg.style.display = 'none'; return; }
@@ -1045,8 +999,8 @@ function gerarProposta() {
   // Save this number and prep next
   localStorage.setItem('rama_ultimo_numero', parseInt(numero) || 0);
   const pixVal = pixAtivo ? parseMoney(document.getElementById('pix-valor').value) : 0;
-  const cotasC = coletarCotas('cliente');
-  const cotasP = coletarCotas('proposta');
+  const cotasC = coletarCotas('cliente').filter(c => c.grupocota && c.grupocota !== '—');
+  const cotasP = coletarCotas('proposta').filter(c => c.grupocota && c.grupocota !== '—');
   const totC = totalCotas(cotasC);
   const totP = totalCotas(cotasP);
   const totalRec = totP.pago + pixVal;
@@ -1194,8 +1148,6 @@ function limparFormulario() {
 }
 
 // ── PAINEL LATERAL ───────────────────────────────────────
-function abrirCalc() { abrirPainel(); }
-function abrirNota()  { abrirPainel(); setTimeout(()=>document.getElementById('nota-texto').focus(),300); }
 
 function abrirPainel() {
   const totC = totalCotas(coletarCotas('cliente'));
@@ -1376,8 +1328,12 @@ function combinar() {
     }
   }
 
-  // Sort by closest to target
-  results.sort((a,b) => Math.abs(a.total-target) - Math.abs(b.total-target));
+  // Ordena: menor parcela total primeiro, desempate pelo mais próximo do valor alvo
+  results.sort((a,b) => {
+    const pDiff = (a.totalParcela || 0) - (b.totalParcela || 0);
+    if (pDiff !== 0) return pDiff;
+    return Math.abs(a.total-target) - Math.abs(b.total-target);
+  });
 
   if (!results.length) {
     infoEl.textContent = '';
@@ -1388,7 +1344,7 @@ function combinar() {
   infoEl.textContent = results.length + ' combinação(ões) encontrada(s)';
 
   // Armazena resultados globalmente e usa índice no onclick
-  window._combResults = results.slice(0,10);
+  window._combResults = results.slice(0,15);
 
   resultEl.innerHTML = window._combResults.map((r, idx) => {
     const diff = r.total - target;
@@ -1440,7 +1396,8 @@ function buscarPorPagoInline(input) {
   const min = v - margem;
   const max = v + margem;
 
-  const base = getBase();
+  // Busca pago inline em todas as bases
+  const base = [...baseVeiculoGeral, ...baseVeiculoRama, ...baseImovelGeral, ...baseImovelRama];
   const matches = base.filter(c => {
     const pago = parseMoney(c.pago);
     return pago >= min && pago <= max;
@@ -1505,6 +1462,10 @@ async function lerExtratoHS(input) {
     // Também tenta pegar o primeiro número grande do documento (aparece logo no início)
     const reCredito = /Cr[^:\n]{0,15}[:\s]+(\d{2,3}\.\d{3},\d{2})/i;
     const reParcela = /Valor\s+Contrib\.?\s*Mensal[:\s]+([\d.]+,\d{2})/i;
+    // Fallbacks para parcela se o padrão principal não bater
+    const reParcela2 = /Contribui[çc][ãa]o\s+Mensal[:\s]+([\d.]+,\d{2})/i;
+    const reParcela3 = /Vl\.?\s*Parcela[:\s]+([\d.]+,\d{2})/i;
+    const reParcela4 = /Total\s+Mensal[:\s]+([\d.]+,\d{2})/i;
     // Total pago: primeiro TOTAL grande seguido de outro TOTAL
     const reTotalPago = /TOTAL\s+([\d]{2,3}\.[\d]{3},\d{2})/i;
 
@@ -1518,7 +1479,11 @@ async function lerExtratoHS(input) {
       // Pega o primeiro que não seja o pago (que vem depois do TOTAL)
       credito = allBig[0]?.[1] || '';
     }
-    const parcela = text.match(reParcela)?.[1] || '';
+    const parcela = text.match(reParcela)?.[1]
+                || text.match(reParcela2)?.[1]
+                || text.match(reParcela3)?.[1]
+                || text.match(reParcela4)?.[1]
+                || '';
     const pago    = text.match(reTotalPago)?.[1] || '';
 
     if (!grupo || !cota) {
