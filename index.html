@@ -272,6 +272,12 @@ header span{font-size:12px;font-weight:600;color:var(--text-muted)}
 #comb-valor::placeholder, #comb-parcela::placeholder {
   color: rgba(255,255,255,0.25) !important;
 }
+
+.extrato-dropzone{border:1.5px dashed rgba(0,157,165,0.4);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .2s;background:rgba(0,157,165,0.05);text-align:center;min-height:80px}
+.extrato-dropzone.drag-over{border-color:#009DA5;background:rgba(0,157,165,0.12);transform:scale(1.01)}
+.extrato-dropzone-icon{font-size:24px;line-height:1}
+.extrato-dropzone-title{font-size:12px;font-weight:700;color:rgba(0,210,220,0.9)}
+.extrato-dropzone-sub{font-size:10px;color:rgba(255,255,255,0.35)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -1433,6 +1439,26 @@ function buscarPorPagoInline(input) {
   sugg.style.display = 'block';
 }
 
+// ── DRAG AND DROP EXTRATO ────────────────────────────────
+function initDropzone() {
+  const zone = document.getElementById('extrato-dropzone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+      const fakeInput = { files: [file] };
+      lerExtratoHS(fakeInput);
+    }
+  });
+}
+
 // ── LEITOR DE EXTRATO HS ─────────────────────────────────
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -1634,6 +1660,7 @@ function reservarCotas() {
 
 // Init
 window.onload = () => {
+  initDropzone();
   // Init steps
   ['card-proposta','card-resumo'].forEach(id => {
     const el = document.getElementById(id);
